@@ -738,10 +738,14 @@ class BrokerConnection(object):
 
     def _try_authenticate_aws(self, future):
         data = b''
-        msg = bytes('\0'.join([self.config['aws_user_id'],
-                               self.config['aws_access_key'],
-                               self.config['aws_access_secret'],
-                               self.config['aws_session_token']]).encode('utf-8'))
+        params = [
+            self.config['aws_user_id'],
+            self.config['aws_access_key'],
+            self.config['aws_access_secret']
+        ]
+        if self.config['aws_session_token']:
+            params.append(self.config['aws_session_token'])
+        msg = bytes('\0'.join(params).encode('utf-8'))
         size = Int32.encode(len(msg))
         try:
             with self._lock:
