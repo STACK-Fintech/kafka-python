@@ -290,8 +290,6 @@ class BrokerConnection(object):
                     'aws_access_key'] is not None, 'aws_access_key is required for AWS sasl'
                 assert self.config[
                     'aws_access_secret'] is not None, 'aws_access_secret is required for AWS sasl'
-                assert self.config[
-                    'aws_session_token'] is not None, 'aws_session_token is required for AWS sasl'
         # This is not a general lock / this class is not generally thread-safe yet
         # However, to avoid pushing responsibility for maintaining
         # per-connection locks to the upstream client, we will use this lock to
