@@ -742,8 +742,6 @@ class BrokerConnection(object):
         ]
         if self.config['aws_credentials']['session_token']:
             params.append(self.config['aws_credentials']['session_token'])
-        print("Trying to authenticate with AWS creds")
-        print(params)
         msg = bytes('\0'.join(params).encode('utf-8'))
         size = Int32.encode(len(msg))
         try:
