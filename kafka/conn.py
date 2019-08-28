@@ -190,10 +190,8 @@ class BrokerConnection(object):
             sasl mechanism handshake. Default: one of bootstrap servers
         sasl_oauth_token_provider (AbstractTokenProvider): OAuthBearer token provider
             instance. (See kafka.oauth.abstract). Default: None
-        aws_user_id (str): The AWS UserId required when sasl_mechanism is AWS,
-        aws_access_key (str): The AWS Access Key Id required when sasl_mechanism is AWS,
-        aws_access_secret (str): The AWS Secret Access Key required when sasl_mechanism is AWS,
-        aws_session_token (str): The AWS Session Token,
+        aws_credentials (dict): A dictionary containing AWS credentials for sasl authentication.
+            It should contain user_id, access_key, access_secret, session_token
     """
 
     DEFAULT_CONFIG = {
@@ -228,10 +226,7 @@ class BrokerConnection(object):
         'sasl_kerberos_service_name': 'kafka',
         'sasl_kerberos_domain_name': None,
         'sasl_oauth_token_provider': None,
-        'aws_user_id': None,
-        'aws_access_key': None,
-        'aws_access_secret': None,
-        'aws_session_token': None,
+        'aws_credentials': {},
     }
     SECURITY_PROTOCOLS = ('PLAINTEXT', 'SSL', 'SASL_PLAINTEXT', 'SASL_SSL')
     SASL_MECHANISMS = ('PLAIN', 'GSSAPI', 'OAUTHBEARER', 'AWS')
@@ -284,12 +279,14 @@ class BrokerConnection(object):
                 assert callable(getattr(token_provider, "token", None)
                                 ), 'sasl_oauth_token_provider must implement method #token()'
             if self.config['sasl_mechanism'] == 'AWS':
-                assert self.config[
-                    'aws_user_id'] is not None, 'aws_user_id is required for AWS sasl'
-                assert self.config[
-                    'aws_access_key'] is not None, 'aws_access_key is required for AWS sasl'
-                assert self.config[
-                    'aws_access_secret'] is not None, 'aws_access_secret is required for AWS sasl'
+                aws_credentials = self.config['aws_credentials']
+                assert type(aws_credentials) is dict, 'aws_credentials should be a dictionary'
+                assert aws_credentials[
+                    'user_id'] is not None, 'user_id is required in aws_credentials for AWS sasl'
+                assert aws_credentials[
+                    'access_secret'] is not None, 'access_secret is required in aws_credentials for AWS sasl'
+                assert aws_credentials[
+                    'user_id'] is not None, 'user_id is required in aws_credentials for AWS sasl'
         # This is not a general lock / this class is not generally thread-safe yet
         # However, to avoid pushing responsibility for maintaining
         # per-connection locks to the upstream client, we will use this lock to
@@ -739,12 +736,12 @@ class BrokerConnection(object):
     def _try_authenticate_aws(self, future):
         data = b''
         params = [
-            self.config['aws_user_id'],
-            self.config['aws_access_key'],
-            self.config['aws_access_secret']
+            self.config['aws_credentials']['user_id'],
+            self.config['aws_credentials']['access_key'],
+            self.config['aws_credentials']['access_secret']
         ]
-        if self.config['aws_session_token']:
-            params.append(self.config['aws_session_token'])
+        if self.config['aws_credentials']['session_token']:
+            params.append(self.config['aws_credentials']['session_token'])
         msg = bytes('\0'.join(params).encode('utf-8'))
         size = Int32.encode(len(msg))
         try:
