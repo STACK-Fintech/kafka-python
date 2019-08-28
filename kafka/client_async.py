@@ -153,10 +153,8 @@ class KafkaClient(object):
             sasl mechanism handshake. Default: one of bootstrap servers
         sasl_oauth_token_provider (AbstractTokenProvider): OAuthBearer token provider
             instance. (See kafka.oauth.abstract). Default: None
-        aws_user_id (str): The AWS UserId required when sasl_mechanism is AWS,
-        aws_access_key (str): The AWS Access Key Id required when sasl_mechanism is AWS,
-        aws_access_secret (str): The AWS Secret Access Key required when sasl_mechanism is AWS,
-        aws_session_token (str): The AWS Session Token,
+        aws_credentials (dict): A dictionary containing AWS credentials for sasl authentication.
+            It should contain user_id, access_key, access_secret, session_token
     """
 
     DEFAULT_CONFIG = {
@@ -196,10 +194,7 @@ class KafkaClient(object):
         'sasl_kerberos_service_name': 'kafka',
         'sasl_kerberos_domain_name': None,
         'sasl_oauth_token_provider': None,
-        'aws_user_id': None,
-        'aws_access_key': None,
-        'aws_access_secret': None,
-        'aws_session_token': None,
+        'aws_credentials': {},
     }
 
     def __init__(self, **configs):
